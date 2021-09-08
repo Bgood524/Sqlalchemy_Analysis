@@ -50,9 +50,14 @@ def prcp():
     session.close() 
     return jsonify(prcp_data)
 
-@app.route("/jsonified")
-def jsonified():
-    return jsonify(hello_dict)
+@app.route("/api/v1.0/stations")
+def stations():
+    session = Session(engine)
+    rows = session.query(Station.station).all()
+    session.close()
+    station_data = list(np.ravel(rows))
+    return jsonify(station_data)
+
 
 
 if __name__ == "__main__":
