@@ -24,6 +24,7 @@ def home():
         /api/v1.0/precipitation<br/>
         /api/v1.0/stations<br/>
         /api/v1.0/start<br/>
+        /api/v1.0/tobs<br/>
         /api/v1.0/start/end<br/>
     """)
 
@@ -57,6 +58,24 @@ def stations():
     session.close()
     station_data = list(np.ravel(rows))
     return jsonify(station_data)
+
+@app.route("/api/v1.0/tobs")
+def tobs():
+    session = Session(engine)
+    last_date = dt.date(2017,8,23) - dt.timedelta(days=365)
+    tobs_data = session.query(Measurement.tobs).filter(Measurement.station == 'USC00519281').filter(Measurement.date >= last_date).all()
+    session.close()
+    tobs_jsonify = list(np.ravel(tobs_data))
+    return jsonify(tobs_jsonify)
+
+@app.route("/api/v1.0/<start>")
+def start(start):
+    session = Session(engine)
+    start = dt.datetime.strptime(start,'%m/%d/%Y')
+    temp_data = session.query(func.min(Measurement.tobs),func.avg(Measurement.tobs),func.max(Measurement.tobs)).all()
+    session.close()
+    temp_data_jsonify = list(np.ravel(temp_data))
+    return jsonify(temp_data_jsonify)
 
 
 
