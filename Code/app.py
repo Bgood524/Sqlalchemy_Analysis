@@ -71,8 +71,18 @@ def tobs():
 @app.route("/api/v1.0/<start>")
 def start(start):
     session = Session(engine)
-    start = dt.datetime.strptime(start,'%m/%d/%Y')
-    temp_data = session.query(func.min(Measurement.tobs),func.avg(Measurement.tobs),func.max(Measurement.tobs)).all()
+    start = dt.datetime.strptime(start,'%m-%d-%Y')
+    temp_data = session.query(func.min(Measurement.tobs),func.avg(Measurement.tobs),func.max(Measurement.tobs)).filter(Measurement.date >= start).all()
+    session.close()
+    temp_data_jsonify = list(np.ravel(temp_data))
+    return jsonify(temp_data_jsonify=temp_data_jsonify)
+
+@app.route("/api/v1.0/<start>/<end>")
+def start_end(start,end):
+    session = Session(engine)
+    start = dt.datetime.strptime(start,'%m-%d-%Y')
+    end = dt.datetime.strptime(end,'%m-%d-%Y')
+    temp_data = session.query(func.min(Measurement.tobs),func.avg(Measurement.tobs),func.max(Measurement.tobs)).filter(Measurement.date >= start).filter(Measurement.date <= end).all()
     session.close()
     temp_data_jsonify = list(np.ravel(temp_data))
     return jsonify(temp_data_jsonify=temp_data_jsonify)
